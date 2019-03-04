@@ -1,7 +1,6 @@
 package factory
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -13,9 +12,19 @@ func randomArguments() (int, int) {
 	return arg1, arg2
 }
 
+func randomOperator() Operator {
+	seed := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(seed)
+	op := r.Intn(3) + 1
+	return Operator(op)
+}
+
 func Ceo(sync chan Job) {
 	for i := 0; i < 10; i++ {
 		a, b := randomArguments()
-		fmt.Println(a, "and", b)
+		c := randomOperator()
+		job := Job{a, b, c}
+		sync <- job
+		println("New job assigned")
 	}
 }

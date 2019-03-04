@@ -3,5 +3,6 @@ package main
 import "github.com/projects/threaded-company-simulation/factory"
 
 func main() {
-	factory.Ceo(nil)
+	sync := make(chan factory.Job, 10)
+	factory.Ceo(sync)
 }
