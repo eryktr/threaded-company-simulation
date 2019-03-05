@@ -1,7 +1,6 @@
 package factory
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 
@@ -30,7 +29,7 @@ func randomJob() Job {
 
 func addJobToList(j Job, l chan Job) {
 	l <- j
-	fmt.Println("Task", j.first, j.operation, j.second, "added to the list.")
+	print_job(j, "added")
 }
 
 func sleep() {

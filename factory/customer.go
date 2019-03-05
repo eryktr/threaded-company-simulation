@@ -1,7 +1,6 @@
 package factory
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -11,7 +10,7 @@ func customer_sleep() {
 
 func fetch_product_from_warehouse(warehouse chan int) {
 	product := <-warehouse
-	fmt.Println("Product", product, "collected by a customer")
+	print_product(product, "collected")
 }
 
 func Customer(warehouse chan int) {

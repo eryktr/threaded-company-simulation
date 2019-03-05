@@ -1,7 +1,6 @@
 package factory
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/projects/threaded-company-simulation/config"
@@ -25,7 +24,7 @@ func createProduct(job Job) int {
 
 func fetch_job(list chan Job) Job {
 	job := <-list
-	fmt.Println("Job", job.first, job.operation, job.second, "assigned to a worker")
+	print_job(job, "assigned")
 	return job
 }
 
@@ -43,7 +42,7 @@ func store_in_warehouse(product int, warehouse chan int) {
 				continue
 			}
 			warehouse <- product
-			fmt.Println("Product", product, "Stored in the warehouse.")
+			print_product(product, "stored")
 			warehouse_mutex.Unlock()
 			break
 		} else {

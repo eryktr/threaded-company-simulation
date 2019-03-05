@@ -9,14 +9,13 @@ import (
 )
 
 func main() {
-	list := make(chan factory.Job, config.TASKLIST_SIZE)
-	warehouse := make(chan int, config.WAREHOUSE_SIZE)
-	go factory.Ceo(list)
+
+	go factory.Ceo(factory.List)
 	for i := 0; i < config.NUM_WORKERS; i++ {
-		go factory.Worker(list, warehouse)
+		go factory.Worker(factory.List, factory.Warehouse)
 	}
 	for i := 0; i < config.NUM_CUSTOMERS; i++ {
-		go factory.Customer(warehouse)
+		go factory.Customer(factory.Warehouse)
 	}
 	fmt.Scanln()
 
