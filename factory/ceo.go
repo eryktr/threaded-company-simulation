@@ -1,6 +1,7 @@
 package factory
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -25,6 +26,7 @@ func Ceo(sync chan Job) {
 		c := randomOperator()
 		job := Job{a, b, c}
 		sync <- job
-		println("New job assigned")
+		fmt.Println("Task", job.first, job.operation, job.second, "added to the list.")
+		time.Sleep()
 	}
 }
