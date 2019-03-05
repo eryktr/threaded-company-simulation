@@ -17,6 +17,10 @@ func main() {
 	for i := 0; i < config.NUM_CUSTOMERS; i++ {
 		go factory.Customer(factory.Warehouse)
 	}
-	fmt.Scanln()
+	if config.MODE == 1 {
+		factory.InputListener()
+	} else {
+		fmt.Scanln()
+	}
 
 }

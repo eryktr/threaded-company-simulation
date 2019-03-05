@@ -1,6 +1,7 @@
 package factory
 
 import (
+	"math/rand"
 	"time"
 )
 
@@ -9,6 +10,11 @@ func customer_sleep() {
 }
 
 func fetch_product_from_warehouse(warehouse chan int) {
+	index := rand.Intn(len(warehouse))
+	for i := 0; i < index; i++ {
+		tmp := <-warehouse
+		warehouse <- tmp
+	}
 	product := <-warehouse
 	print_product(product, "collected")
 }
