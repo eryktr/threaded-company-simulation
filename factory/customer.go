@@ -21,7 +21,7 @@ func fetch_random_product(warehouse chan int) int {
 
 func fetch_product_from_warehouse(warehouse chan int) {
 	product := fetch_random_product(warehouse)
-	print_product(product, "collected")
+	print_product_collected(product)
 }
 
 func Customer(warehouse chan int) {

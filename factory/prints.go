@@ -19,27 +19,41 @@ func operation_to_ascii(operation Operator) string {
 
 var mode = config.MODE
 
-func print_job(j Job, m string) {
-
-	if (mode == 1 && m != "diagnostic") || (m != "added" && m != "assigned" && m != "diagnostic") {
+func print_job_added(j Job) {
+	if mode == 1 {
 		return
 	}
-	if m == "added" || m == "diagnostic" {
-		fmt.Println("Task", j.first, operation_to_ascii(j.operation), j.second, "added to the list.")
-	} else {
-		fmt.Println("Job", j.first, operation_to_ascii(j.operation), j.second, "assigned to a worker")
-	}
+	fmt.Println("Task", j.first, operation_to_ascii(j.operation), j.second, "added to the list.")
+
 }
 
-func print_product(p int, m string) {
-	if (mode == 1 && m != "diagnostic") || (m != "stored" && m != "collected" && m != "diagnostic") {
+func print_job_fetched(j Job) {
+	if mode == 1 {
 		return
 	}
-	if m == "stored" || m == "diagnostic" {
-		fmt.Println("Product", p, "Stored in the warehouse.")
-	} else {
-		fmt.Println("Product", p, "collected by a customer")
+	fmt.Println("Job", j.first, operation_to_ascii(j.operation), j.second, "assigned to a worker")
+}
+
+func print_job_diagnostic(j Job) {
+	fmt.Println("Job", j.first, operation_to_ascii(j.operation), j.second)
+}
+
+func print_product_added(product int) {
+	if mode == 1 {
+		return
 	}
+	fmt.Println("Product", product, "Stored in the warehouse.")
+}
+
+func print_product_collected(product int) {
+	if mode == 1 {
+		return
+	}
+	fmt.Println("Product", product, "collected by a customer")
+}
+
+func print_product_diagnostic(product int) {
+	fmt.Println("Product", product)
 }
 
 func print_all_jobs(list chan Job) {
@@ -51,8 +65,7 @@ func print_all_jobs(list chan Job) {
 	} else {
 		for i := 0; i < size; i++ {
 			j := <-list
-			//print("printing job")
-			print_job(j, "diagnostic")
+			print_job_diagnostic(j)
 			list <- j
 		}
 	}
@@ -70,8 +83,7 @@ func print_all_products(list chan int) {
 	} else {
 		for i := 0; i < size; i++ {
 			j := <-list
-			//print("printing job")
-			print_product(j, "diagnostic")
+			print_product_diagnostic(j)
 			list <- j
 		}
 	}

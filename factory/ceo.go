@@ -29,7 +29,7 @@ func randomJob() Job {
 
 func addJobToList(j Job, l chan Job) {
 	l <- j
-	print_job(j, "added")
+	print_job_added(j)
 }
 
 func sleep() {

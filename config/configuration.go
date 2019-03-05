@@ -22,4 +22,4 @@ const (
 	VERBOSE = 0
 	SILENT  = 1
 )
-const MODE = SILENT
+const MODE = VERBOSE

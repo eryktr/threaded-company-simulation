@@ -24,7 +24,7 @@ func createProduct(job Job) int {
 
 func fetch_job(list chan Job) Job {
 	job := <-list
-	print_job(job, "assigned")
+	print_job_fetched(job)
 	return job
 }
 
@@ -42,7 +42,7 @@ func store_in_warehouse(product int, warehouse chan int) {
 				continue
 			}
 			warehouse <- product
-			print_product(product, "stored")
+			print_product_added(product)
 			warehouse_mutex.Unlock()
 			break
 		} else {
