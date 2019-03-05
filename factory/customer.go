@@ -9,13 +9,18 @@ func customer_sleep() {
 	time.Sleep(randomSleepDuration(PT_CUSTOMER) * time.Second)
 }
 
-func fetch_product_from_warehouse(warehouse chan int) {
+func fetch_random_product(warehouse chan int) int {
 	index := rand.Intn(len(warehouse))
 	for i := 0; i < index; i++ {
 		tmp := <-warehouse
 		warehouse <- tmp
 	}
 	product := <-warehouse
+	return product
+}
+
+func fetch_product_from_warehouse(warehouse chan int) {
+	product := fetch_random_product(warehouse)
 	print_product(product, "collected")
 }
 
