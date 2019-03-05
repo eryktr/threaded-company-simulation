@@ -3,6 +3,8 @@ package factory
 import (
 	"math/rand"
 	"time"
+
+	"github.com/projects/threaded-company-simulation/config"
 )
 
 type PersonType int
@@ -13,8 +15,18 @@ const (
 	PT_CUSTOMER PersonType = 3
 )
 
-func randomSleepDuration(pt PersonType) float64 {
+func randomSleepDuration(pt PersonType) time.Duration {
 	seed := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(seed)
-	return
+	coef := r.Float64()
+	switch pt {
+	case PT_CEO:
+		return time.Duration(coef * config.AVERAGE_CEO_DELAY)
+	case PT_WORKER:
+		return time.Duration(coef * config.AVERAGE_WORKER_DELAY)
+	case PT_CUSTOMER:
+		return time.Duration(coef * config.AVERAGE_CUSTOMER_DELAY)
+	default:
+		return 0
+	}
 }

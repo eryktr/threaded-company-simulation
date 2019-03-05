@@ -1,8 +1,21 @@
 package main
 
-import "github.com/projects/threaded-company-simulation/factory"
+import (
+	"fmt"
+
+	"github.com/projects/threaded-company-simulation/factory"
+)
 
 func main() {
-	sync := make(chan factory.Job, 10)
-	factory.Ceo(sync)
+	list := make(chan factory.Job, 200)
+	warehouse := make(chan int, 500)
+	go factory.Ceo(list)
+	for i := 0; i < 1; i++ {
+		go factory.Worker(list, warehouse)
+	}
+	for i := 0; i < 1; i++ {
+		go factory.Customer(warehouse)
+	}
+	fmt.Scanln()
+
 }

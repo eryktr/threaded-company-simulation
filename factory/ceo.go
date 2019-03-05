@@ -20,13 +20,21 @@ func randomOperator() Operator {
 	return Operator(op)
 }
 
-func Ceo(sync chan Job) {
-	for i := 0; i < 10; i++ {
-		a, b := randomArguments()
-		c := randomOperator()
-		job := Job{a, b, c}
-		sync <- job
-		fmt.Println("Task", job.first, job.operation, job.second, "added to the list.")
-		time.Sleep()
+func Ceo(list chan Job) {
+	for {
+		if len(list) < 30 {
+			list_mutex.Lock()
+			if len(list) >= 30 {
+				list_mutex.Unlock()
+				continue
+			}
+			a, b := randomArguments()
+			c := randomOperator()
+			job := Job{a, b, c}
+			list <- job
+			fmt.Println("Task", job.first, job.operation, job.second, "added to the list.")
+			list_mutex.Unlock()
+			time.Sleep(randomSleepDuration(PT_CEO) * time.Second)
+		}
 	}
 }
