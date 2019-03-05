@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/projects/threaded-company-simulation/config"
 )
 
 func randomArguments() (int, int) {
@@ -20,21 +22,36 @@ func randomOperator() Operator {
 	return Operator(op)
 }
 
+func randomJob() Job {
+	a, b := randomArguments()
+	c := randomOperator()
+	return Job{a, b, c}
+}
+
+func addJobToList(j Job, l chan Job) {
+	l <- j
+	fmt.Println("Task", j.first, j.operation, j.second, "added to the list.")
+}
+
+func sleep() {
+	time.Sleep(randomSleepDuration(PT_CEO) * time.Second)
+}
+
 func Ceo(list chan Job) {
+	max_list_size := config.TASKLIST_SIZE
 	for {
-		if len(list) < 30 {
-			list_mutex.Lock()
-			if len(list) >= 30 {
-				list_mutex.Unlock()
+		if len(list) < max_list_size {
+			lock_list()
+			if len(list) >= max_list_size {
+				unlock_list()
 				continue
 			}
-			a, b := randomArguments()
-			c := randomOperator()
-			job := Job{a, b, c}
-			list <- job
-			fmt.Println("Task", job.first, job.operation, job.second, "added to the list.")
-			list_mutex.Unlock()
-			time.Sleep(randomSleepDuration(PT_CEO) * time.Second)
+			job := randomJob()
+			addJobToList(job, list)
+			unlock_list()
+			sleep()
+		} else {
+			sleep_failure()
 		}
 	}
 }
