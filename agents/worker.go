@@ -1,34 +1,26 @@
 package agents
 
 import (
+	"fmt"
 	"time"
 )
 
 type Worker struct {
-	id        int
-	TaskList  TaskListReadOperation
-	Warehouse WarehouseWriteOperation
+	Id        int
+	TaskList  chan TaskListReadOperation
+	Warehouse chan WarehouseWriteOperation
 }
 
-func (worker *Worker) run() {
+func (worker *Worker) Run() {
 	for {
-		// if len(list) > 0 {
-		// 	lock_list()
-		// 	if len(list) == 0 {
-		// 		unlock_list()
-		// 		continue
-		// 	}
-		// 	job := fetch_job(list)
-		// 	unlock_list()
-		// 	worker_sleep()
-		// 	product := createProduct(job)
-		// 	store_in_warehouse(product, warehouse)
-		// } else {
-		// 	sleep_failure()
-		// }
+		job := worker.FetchJob()
+		worker.Sleep()
+		product := worker.CreateProduct(job)
+		worker.StoreProduct(product)
+		worker.Sleep()
 	}
 }
-func (worker *Worker) createProduct(job Job) int {
+func (worker *Worker) CreateProduct(job Job) int {
 	first := job.first
 	second := job.second
 	operation := job.operation
@@ -44,31 +36,33 @@ func (worker *Worker) createProduct(job Job) int {
 	}
 }
 
-func (worker *Worker) fetch_job(list chan Job) Job {
-	job := <-list
-	Print_job_fetched(job)
+func (worker *Worker) FetchJob() Job {
+	accepted := false
+	response := make(chan Job, 1)
+	for !accepted {
+		success := make(chan bool, 1)
+		request := TaskListReadOperation{response, success}
+		worker.TaskList <- request
+		accepted = <-success
+		time.Sleep(100 * time.Millisecond)
+	}
+	job := <-response
+	fmt.Printf("Worker %d: FETCHED %s\n", worker.Id, job.ToString())
 	return job
 }
 
-func (worker *Worker) sleep() {
+func (worker *Worker) Sleep() {
 	time.Sleep(RandomSleepDuration(PT_WORKER) * time.Second)
 }
 
-func (worker *Worker) store_product(product int, warehouse chan int) {
-	// max_warehouse_size := config.WAREHOUSE_SIZE
-	// for {
-	// 	if len(warehouse) < max_warehouse_size {
-	// 		warehouse_mutex.Lock()
-	// 		if len(warehouse) >= max_warehouse_size {
-	// 			warehouse_mutex.Unlock()
-	// 			continue
-	// 		}
-	// 		warehouse <- product
-	// 		print_product_added(product)
-	// 		warehouse_mutex.Unlock()
-	// 		break
-	// 	} else {
-	// 		sleep_failure()
-	// 	}
-	// }
+func (worker *Worker) StoreProduct(product int) {
+	accepted := false
+
+	for !accepted {
+		success := make(chan bool, 1)
+		operation := WarehouseWriteOperation{product, success}
+		worker.Warehouse <- operation
+		accepted = <-success
+	}
+	fmt.Printf("Worker %d: PRODUCT %d STORED IN THE WAREHOUSE\n", worker.Id, product)
 }

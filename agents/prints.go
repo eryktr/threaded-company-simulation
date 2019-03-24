@@ -6,17 +6,6 @@ import (
 	"github.com/projects/threaded-company-simulation/config"
 )
 
-func Operation_to_ascii(operation Operator) string {
-	switch operation {
-	case PLUS:
-		return "+"
-	case MINUS:
-		return "-"
-	default:
-		return "*"
-	}
-}
-
 var mode = config.MODE
 
 func Print_job_added(j Job) {

@@ -6,8 +6,8 @@ type TaskListWriteOperation struct {
 }
 
 type TaskListReadOperation struct {
-	JobChannel chan Job
-	Success    chan bool
+	Task    chan Job
+	Success chan bool
 }
 
 type WarehouseWriteOperation struct {

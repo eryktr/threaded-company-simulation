@@ -19,9 +19,15 @@ func SynchronizeWarehouse() {
 			} else {
 				delivery.Success <- false
 			}
+
 		case visit := <-WarehouseRead:
 			if len(Warehouse) > 0 {
-
+				prod := popRandomProduct()
+				visit.product <- prod
+				visit.Success <- true
+				break
+			} else {
+				visit.Success <- false
 			}
 		}
 

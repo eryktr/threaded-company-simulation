@@ -3,22 +3,28 @@ package main
 import (
 	"fmt"
 
+	"github.com/projects/threaded-company-simulation/agents"
 	"github.com/projects/threaded-company-simulation/config"
-
-	"github.com/projects/threaded-company-simulation/factory"
 )
 
 func main() {
 
-	go factory.Ceo(factory.List)
+	go agents.SynchronizeWarehouse()
+	go agents.SynchronizeTaskList()
+
+	Boss := agents.Boss{1, agents.TaskListWrite}
+	go Boss.Run()
+
 	for i := 0; i < config.NUM_WORKERS; i++ {
-		go factory.Worker(factory.List, factory.Warehouse)
+		w := agents.Worker{i, agents.TaskListRead, agents.WarehouseWrite}
+		go w.Run()
 	}
 	for i := 0; i < config.NUM_CUSTOMERS; i++ {
-		go factory.Customer(factory.Warehouse)
+		cust := agents.Customer{i, agents.WarehouseRead}
+		go cust.Run()
 	}
 	if config.MODE == 1 {
-		factory.InputListener()
+		//factory.InputListener()
 	} else {
 		fmt.Scanln()
 	}

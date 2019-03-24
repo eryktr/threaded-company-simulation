@@ -1,11 +1,42 @@
 package agents
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
-
-	"github.com/projects/threaded-company-simulation/config"
 )
+
+type Boss struct {
+	Id       int
+	TaskList chan TaskListWriteOperation
+}
+
+func (boss *Boss) Run() {
+	for {
+		accepted := false
+		job := boss.GenerateRandomJob()
+		for !accepted {
+			responseChannel := make(chan bool, 1)
+			writeOperation := TaskListWriteOperation{job, responseChannel}
+			boss.TaskList <- writeOperation
+			accepted = <-responseChannel
+			time.Sleep(100 * time.Millisecond)
+		}
+
+		fmt.Println("BOSS: Task ", job.ToString(), "added to the list.")
+		boss.Sleep()
+	}
+}
+
+func (boss *Boss) GenerateRandomJob() Job {
+	a, b := randomArguments()
+	c := randomOperator()
+	return Job{a, b, c}
+}
+
+func (boss *Boss) Sleep() {
+	time.Sleep(RandomSleepDuration(PT_CEO) * time.Second)
+}
 
 func randomArguments() (int, int) {
 	seed := rand.NewSource(time.Now().UnixNano())
@@ -19,38 +50,4 @@ func randomOperator() Operator {
 	r := rand.New(seed)
 	op := r.Intn(3) + 1
 	return Operator(op)
-}
-
-func randomJob() Job {
-	a, b := randomArguments()
-	c := randomOperator()
-	return Job{a, b, c}
-}
-
-func addJobToList(j Job, l chan Job) {
-	l <- j
-	print_job_added(j)
-}
-
-func sleep() {
-	time.Sleep(randomSleepDuration(PT_CEO) * time.Second)
-}
-
-func Ceo(list chan Job) {
-	max_list_size := config.TASKLIST_SIZE
-	for {
-		if len(list) < max_list_size {
-			lock_list()
-			if len(list) >= max_list_size {
-				unlock_list()
-				continue
-			}
-			job := randomJob()
-			addJobToList(job, list)
-			unlock_list()
-			sleep()
-		} else {
-			sleep_failure()
-		}
-	}
 }

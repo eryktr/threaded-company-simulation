@@ -17,12 +17,11 @@ func SynchronizeTaskList() {
 			} else {
 				write.Success <- false
 			}
-
 		case read := <-TaskListRead:
 			if len(TaskList) > 0 {
 				task := TaskList[0]
 				TaskList = TaskList[1:]
-				read.JobChannel <- task
+				read.Task <- task
 				read.Success <- true
 			} else {
 				read.Success <- false

@@ -1,43 +1,30 @@
 package agents
 
 import (
-	"math/rand"
+	"fmt"
 	"time"
 )
 
 type Customer struct {
-	id        int
-	Warehouse WarehouseReadOperation
+	Id        int
+	Warehouse chan WarehouseReadOperation
 }
 
-func (customer *Customer) start(warehouse chan int) {
-	// for {
-	// 	if len(warehouse) > 0 {
-	// 		if len(warehouse) <= 0 {
-	// 			continue
-	// 		}
-	// 		fetch_product_from_warehouse(warehouse)
-	// 	} else {
-	// 		sleep_failure()
-	// 	}
-	// }
-}
-
-func (customer *Customer) sleep() {
-	time.Sleep(RandomSleepDuration(PT_CUSTOMER) * time.Second)
-}
-
-func fetch_random_product(warehouse chan int) int {
-	index := rand.Intn(len(warehouse))
-	for i := 0; i < index; i++ {
-		tmp := <-warehouse
-		warehouse <- tmp
+func (customer *Customer) Run() {
+	for {
+		product := make(chan int, 1)
+		accepted := false
+		for !accepted {
+			success := make(chan bool, 1)
+			request := WarehouseReadOperation{product, success}
+			customer.Warehouse <- request
+			accepted = <-success
+		}
+		fmt.Printf("Customer %d: PRODUCT %d PICKED FROM THE WAREHOUSE\n", customer.Id, <-product)
+		customer.Sleep()
 	}
-	product := <-warehouse
-	return product
 }
 
-func fetch_product_from_warehouse(warehouse chan int) {
-	product := fetch_random_product(warehouse)
-	Print_product_collected(product)
+func (customer *Customer) Sleep() {
+	time.Sleep(RandomSleepDuration(PT_CUSTOMER) * time.Second)
 }
