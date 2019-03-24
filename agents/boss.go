@@ -1,4 +1,4 @@
-package factory
+package agents
 
 import (
 	"math/rand"

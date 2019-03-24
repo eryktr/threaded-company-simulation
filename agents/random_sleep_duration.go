@@ -1,4 +1,4 @@
-package factory
+package agents
 
 import (
 	"math/rand"
@@ -15,7 +15,7 @@ const (
 	PT_CUSTOMER PersonType = 3
 )
 
-func randomSleepDuration(pt PersonType) time.Duration {
+func RandomSleepDuration(pt PersonType) time.Duration {
 	seed := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(seed)
 	coef := r.Float64()
