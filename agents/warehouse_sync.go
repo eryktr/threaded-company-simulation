@@ -1,6 +1,7 @@
 package agents
 
 import (
+	"fmt"
 	"math/rand"
 
 	"github.com/projects/threaded-company-simulation/config"
@@ -46,5 +47,11 @@ func maybeCollect(expression bool, c chan WarehouseReadOperation) chan Warehouse
 		return c
 	} else {
 		return nil
+	}
+}
+
+func PrintWarehouse() {
+	for _, element := range Warehouse {
+		fmt.Println("PRODUCT", element)
 	}
 }

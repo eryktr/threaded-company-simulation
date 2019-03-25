@@ -9,6 +9,7 @@ type Worker struct {
 	Id        int
 	TaskList  chan TaskListReadOperation
 	Warehouse chan WarehouseWriteOperation
+	Logger    chan string
 }
 
 func (worker *Worker) Run() {
@@ -37,17 +38,12 @@ func (worker *Worker) CreateProduct(job Job) int {
 }
 
 func (worker *Worker) FetchJob() Job {
-	accepted := false
 	response := make(chan Job, 1)
-	for !accepted {
-		success := make(chan bool, 1)
-		request := TaskListReadOperation{response, success}
-		worker.TaskList <- request
-		accepted = <-success
-		time.Sleep(100 * time.Millisecond)
-	}
+	success := make(chan bool, 1)
+	request := TaskListReadOperation{response, success}
+	worker.TaskList <- request
 	job := <-response
-	fmt.Printf("Worker %d: FETCHED %s\n", worker.Id, job.ToString())
+	worker.Logger <- fmt.Sprintf("Worker %d: FETCHED %s\n", worker.Id, job.ToString())
 	return job
 }
 
@@ -56,13 +52,9 @@ func (worker *Worker) Sleep() {
 }
 
 func (worker *Worker) StoreProduct(product int) {
-	accepted := false
 
-	for !accepted {
-		success := make(chan bool, 1)
-		operation := WarehouseWriteOperation{product, success}
-		worker.Warehouse <- operation
-		accepted = <-success
-	}
-	fmt.Printf("Worker %d: PRODUCT %d STORED IN THE WAREHOUSE\n", worker.Id, product)
+	success := make(chan bool, 1)
+	operation := WarehouseWriteOperation{product, success}
+	worker.Warehouse <- operation
+	worker.Logger <- fmt.Sprintf("Worker %d: PRODUCT %d STORED IN THE WAREHOUSE\n", worker.Id, product)
 }

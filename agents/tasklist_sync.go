@@ -1,6 +1,8 @@
 package agents
 
 import (
+	"fmt"
+
 	"github.com/projects/threaded-company-simulation/config"
 )
 
@@ -36,5 +38,11 @@ func maybeWrite(expression bool, c chan TaskListWriteOperation) chan TaskListWri
 		return c
 	} else {
 		return nil
+	}
+}
+
+func PrintTasklist() {
+	for _, element := range TaskList {
+		fmt.Println("TASK", element.ToString())
 	}
 }

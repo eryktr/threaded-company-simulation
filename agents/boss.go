@@ -9,6 +9,7 @@ import (
 type Boss struct {
 	Id       int
 	TaskList chan TaskListWriteOperation
+	Logger   chan string
 }
 
 func (boss *Boss) Run() {
@@ -18,7 +19,7 @@ func (boss *Boss) Run() {
 		writeOperation := TaskListWriteOperation{job, responseChannel}
 		boss.TaskList <- writeOperation
 		time.Sleep(100 * time.Millisecond)
-		fmt.Println("BOSS: Task ", job.ToString(), "added to the list.")
+		boss.Logger <- fmt.Sprintln("BOSS: Task ", job.ToString(), "added to the list.")
 		boss.Sleep()
 	}
 }
