@@ -2,7 +2,7 @@ package config
 
 const (
 	AVERAGE_CEO_DELAY      = 1.0
-	AVERAGE_WORKER_DELAY   = 20.0
+	AVERAGE_WORKER_DELAY   = 40.0
 	AVERAGE_CUSTOMER_DELAY = 30.0
 )
 

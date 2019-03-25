@@ -12,23 +12,15 @@ var Warehouse []int = make([]int, 0, Capacity)
 func SynchronizeWarehouse() {
 	for {
 		select {
-		case delivery := <-WarehouseWrite:
-			if len(Warehouse) < Capacity {
-				Warehouse = append(Warehouse, delivery.product)
-				delivery.Success <- true
-			} else {
-				delivery.Success <- false
-			}
+		case delivery := <-maybeStore(len(Warehouse) < Capacity, WarehouseWrite):
+			Warehouse = append(Warehouse, delivery.product)
+			delivery.Success <- true
 
-		case visit := <-WarehouseRead:
-			if len(Warehouse) > 0 {
-				prod := popRandomProduct()
-				visit.product <- prod
-				visit.Success <- true
-				break
-			} else {
-				visit.Success <- false
-			}
+		case visit := <-maybeCollect(len(Warehouse) > 0, WarehouseRead):
+			prod := popRandomProduct()
+			visit.product <- prod
+			visit.Success <- true
+			break
 		}
 
 	}
@@ -39,4 +31,20 @@ func popRandomProduct() int {
 	prod := Warehouse[i]
 	Warehouse = append(Warehouse[:i], Warehouse[i+1:]...)
 	return prod
+}
+
+func maybeStore(expression bool, c chan WarehouseWriteOperation) chan WarehouseWriteOperation {
+	if expression {
+		return c
+	} else {
+		return nil
+	}
+}
+
+func maybeCollect(expression bool, c chan WarehouseReadOperation) chan WarehouseReadOperation {
+	if expression {
+		return c
+	} else {
+		return nil
+	}
 }

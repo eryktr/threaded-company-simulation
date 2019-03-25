@@ -13,16 +13,11 @@ type Boss struct {
 
 func (boss *Boss) Run() {
 	for {
-		accepted := false
 		job := boss.GenerateRandomJob()
-		for !accepted {
-			responseChannel := make(chan bool, 1)
-			writeOperation := TaskListWriteOperation{job, responseChannel}
-			boss.TaskList <- writeOperation
-			accepted = <-responseChannel
-			time.Sleep(100 * time.Millisecond)
-		}
-
+		responseChannel := make(chan bool, 1)
+		writeOperation := TaskListWriteOperation{job, responseChannel}
+		boss.TaskList <- writeOperation
+		time.Sleep(100 * time.Millisecond)
 		fmt.Println("BOSS: Task ", job.ToString(), "added to the list.")
 		boss.Sleep()
 	}

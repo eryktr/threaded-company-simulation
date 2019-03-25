@@ -13,13 +13,9 @@ type Customer struct {
 func (customer *Customer) Run() {
 	for {
 		product := make(chan int, 1)
-		accepted := false
-		for !accepted {
-			success := make(chan bool, 1)
-			request := WarehouseReadOperation{product, success}
-			customer.Warehouse <- request
-			accepted = <-success
-		}
+		success := make(chan bool, 1)
+		request := WarehouseReadOperation{product, success}
+		customer.Warehouse <- request
 		fmt.Printf("Customer %d: PRODUCT %d PICKED FROM THE WAREHOUSE\n", customer.Id, <-product)
 		customer.Sleep()
 	}

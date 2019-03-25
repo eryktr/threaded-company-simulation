@@ -10,22 +10,31 @@ var TaskList []Job = make([]Job, 0, MaxSize)
 func SynchronizeTaskList() {
 	for {
 		select {
-		case write := <-TaskListWrite:
-			if len(TaskList) < MaxSize {
-				TaskList = append(TaskList, write.Task)
-				write.Success <- true
-			} else {
-				write.Success <- false
-			}
-		case read := <-TaskListRead:
-			if len(TaskList) > 0 {
-				task := TaskList[0]
-				TaskList = TaskList[1:]
-				read.Task <- task
-				read.Success <- true
-			} else {
-				read.Success <- false
-			}
+		case write := <-maybeWrite(len(TaskList) < MaxSize, TaskListWrite):
+			TaskList = append(TaskList, write.Task)
+			write.Success <- true
+
+		case read := <-maybeRead(len(TaskList) > 0, TaskListRead):
+			task := TaskList[0]
+			TaskList = TaskList[1:]
+			read.Task <- task
+			read.Success <- true
 		}
+	}
+}
+
+func maybeRead(expression bool, c chan TaskListReadOperation) chan TaskListReadOperation {
+	if expression {
+		return c
+	} else {
+		return nil
+	}
+}
+
+func maybeWrite(expression bool, c chan TaskListWriteOperation) chan TaskListWriteOperation {
+	if expression {
+		return c
+	} else {
+		return nil
 	}
 }
