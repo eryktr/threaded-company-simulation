@@ -13,6 +13,7 @@ const (
 	PT_CEO      PersonType = 1
 	PT_WORKER   PersonType = 2
 	PT_CUSTOMER PersonType = 3
+	PT_MACHINE  PersonType = 4
 )
 
 func RandomSleepDuration(pt PersonType) time.Duration {
@@ -26,6 +27,8 @@ func RandomSleepDuration(pt PersonType) time.Duration {
 		return time.Duration(coef * config.AVERAGE_WORKER_DELAY)
 	case PT_CUSTOMER:
 		return time.Duration(coef * config.AVERAGE_CUSTOMER_DELAY)
+	case PT_MACHINE:
+		return time.Duration(coef * config.AVERAGE_MACHINE_DELAY)
 	default:
 		return 0
 	}

@@ -27,7 +27,7 @@ func (boss *Boss) Run() {
 func (boss *Boss) GenerateRandomJob() Job {
 	a, b := randomArguments()
 	c := randomOperator()
-	return Job{a, b, c}
+	return Job{a, b, c, 0}
 }
 
 func (boss *Boss) Sleep() {
@@ -44,6 +44,6 @@ func randomArguments() (int, int) {
 func randomOperator() Operator {
 	seed := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(seed)
-	op := r.Intn(3) + 1
+	op := r.Intn(2) + 1
 	return Operator(op)
 }

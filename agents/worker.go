@@ -2,14 +2,19 @@ package agents
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 )
 
 type Worker struct {
-	Id        int
-	TaskList  chan TaskListReadOperation
-	Warehouse chan WarehouseWriteOperation
-	Logger    chan string
+	Id             int
+	TaskList       chan TaskListReadOperation
+	Warehouse      chan WarehouseWriteOperation
+	Logger         chan string
+	MulltMachines  []MultiplicationMachine
+	AddMachines    []AdditionMachine
+	CompletedTasks int
+	IsPatient      bool
 }
 
 func (worker *Worker) Run() {
@@ -22,19 +27,25 @@ func (worker *Worker) Run() {
 	}
 }
 func (worker *Worker) CreateProduct(job Job) int {
-	first := job.first
-	second := job.second
-	operation := job.operation
-	switch operation {
-	case PLUS:
-		return first + second
-	case MINUS:
-		return first - second
-	case TIMES:
-		return first * second
-	default:
-		return 0
+
+	if worker.IsPatient {
+		if job.Operation == PLUS {
+			machine := worker.randomAdditionMachine()
+			result := make(chan Job)
+			request := MachineWriteOp{job, result}
+			machine.Input <- request
+			res := <-result
+			return res.Result
+		} else if job.Operation == TIMES {
+			machine := worker.randomMultiplicationMachine()
+			result := make(chan Job)
+			request := MachineWriteOp{job, result}
+			machine.Input <- request
+			res := <-result
+			return res.Result
+		}
 	}
+	return 0
 }
 
 func (worker *Worker) FetchJob() Job {
@@ -52,9 +63,18 @@ func (worker *Worker) Sleep() {
 }
 
 func (worker *Worker) StoreProduct(product int) {
-
 	success := make(chan bool, 1)
 	operation := WarehouseWriteOperation{product, success}
 	worker.Warehouse <- operation
 	worker.Logger <- fmt.Sprintf("Worker %d: PRODUCT %d STORED IN THE WAREHOUSE\n", worker.Id, product)
+}
+
+func (worker *Worker) randomMultiplicationMachine() MultiplicationMachine {
+	i := rand.Intn(len(worker.MulltMachines))
+	return worker.MulltMachines[i]
+}
+
+func (worker *Worker) randomAdditionMachine() AdditionMachine {
+	i := rand.Intn(len(worker.AddMachines))
+	return worker.AddMachines[i]
 }

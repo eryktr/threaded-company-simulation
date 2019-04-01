@@ -19,7 +19,33 @@ func RunBoss() {
 	go Boss.Run()
 }
 
+func CreateMultMachines() []agents.MultiplicationMachine {
+	var machines = make([]agents.MultiplicationMachine, config.NUM_MULT_MACHINES)
+	for i := 0; i < config.NUM_MULT_MACHINES; i++ {
+		machine := agents.MultiplicationMachine{
+			Id:     i,
+			Input:  make(chan agents.MachineWriteOp, 1),
+			Logger: agents.LogChannel}
+		machines = append(machines, machine)
+	}
+	return machines
+}
+
+func CreateAdditionMachines() []agents.AdditionMachine {
+	var machines = make([]agents.AdditionMachine, config.NUM_MULT_MACHINES)
+	for i := 0; i < config.NUM_MULT_MACHINES; i++ {
+		machine := agents.AdditionMachine{
+			Id:     i,
+			Input:  make(chan agents.MachineWriteOp, 1),
+			Logger: agents.LogChannel}
+		machines = append(machines, machine)
+	}
+	return machines
+}
+
 func RunWorkers() {
+	additionMachines := CreateAdditionMachines()
+	multiplicationMachines := CreateMultMachines()
 	for i := 0; i < config.NUM_WORKERS; i++ {
 		w := agents.Worker{i, agents.TaskListRead, agents.WarehouseWrite, agents.LogChannel}
 		go w.Run()
