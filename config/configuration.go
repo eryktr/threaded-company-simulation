@@ -2,9 +2,9 @@ package config
 
 const (
 	AVERAGE_CEO_DELAY      = 1.0
-	AVERAGE_WORKER_DELAY   = 40.0
+	AVERAGE_WORKER_DELAY   = 2.0
 	AVERAGE_CUSTOMER_DELAY = 30.0
-	AVERAGE_MACHINE_DELAY  = 40.0
+	AVERAGE_MACHINE_DELAY  = 10.0
 )
 
 const (
@@ -13,10 +13,10 @@ const (
 )
 
 const (
-	NUM_WORKERS       = 30
+	NUM_WORKERS       = 40
 	NUM_CUSTOMERS     = 10
-	NUM_ADD_MACHINES  = 4
-	NUM_MULT_MACHINES = 4
+	NUM_ADD_MACHINES  = 3
+	NUM_MULT_MACHINES = 3
 )
 
 const (
@@ -24,4 +24,4 @@ const (
 	SILENT  = 1
 )
 
-const MODE = VERBOSE
+const MODE = SILENT

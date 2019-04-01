@@ -1,4 +1,4 @@
-package factory
+package main
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 func PrintMenu() {
 	fmt.Println("[1] Show tasklist")
 	fmt.Println("[2] Show warehouse")
+	fmt.Println("[3] Show workers information")
 	fmt.Println("Choice: ")
 }
 
@@ -26,7 +27,16 @@ func ProcessChoice(choice int) {
 		agents.PrintTasklist()
 	case 2:
 		agents.PrintWarehouse()
+	case 3:
+		PrintWorkers()
 	default:
 		fmt.Println("Invalid choice:-(")
+	}
+}
+
+func PrintWorkers() {
+	for i := 0; i < len(workers); i++ {
+		w := workers[i]
+		fmt.Printf("Id: %d, Tasks done: %d, Is patient: %v\n", w.Id, w.CompletedTasks, w.IsPatient)
 	}
 }

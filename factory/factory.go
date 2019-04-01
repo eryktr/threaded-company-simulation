@@ -1,6 +1,8 @@
 package factory
 
 import (
+	"math/rand"
+
 	"github.com/projects/threaded-company-simulation/agents"
 	"github.com/projects/threaded-company-simulation/config"
 )
@@ -20,11 +22,11 @@ func RunBoss() {
 }
 
 func CreateMultMachines() []agents.MultiplicationMachine {
-	var machines = make([]agents.MultiplicationMachine, config.NUM_MULT_MACHINES)
+	var machines = make([]agents.MultiplicationMachine, 0)
 	for i := 0; i < config.NUM_MULT_MACHINES; i++ {
 		machine := agents.MultiplicationMachine{
 			Id:     i,
-			Input:  make(chan agents.MachineWriteOp, 1),
+			Input:  make(chan agents.MachineWriteOp),
 			Logger: agents.LogChannel}
 		go machine.RunMultiplicationMachine()
 		machines = append(machines, machine)
@@ -33,11 +35,11 @@ func CreateMultMachines() []agents.MultiplicationMachine {
 }
 
 func CreateAdditionMachines() []agents.AdditionMachine {
-	var machines = make([]agents.AdditionMachine, config.NUM_MULT_MACHINES)
+	var machines = make([]agents.AdditionMachine, 0)
 	for i := 0; i < config.NUM_MULT_MACHINES; i++ {
 		machine := agents.AdditionMachine{
 			Id:     i,
-			Input:  make(chan agents.MachineWriteOp, 1),
+			Input:  make(chan agents.MachineWriteOp),
 			Logger: agents.LogChannel}
 		go machine.RunAdditionMachine()
 		machines = append(machines, machine)
@@ -45,17 +47,18 @@ func CreateAdditionMachines() []agents.AdditionMachine {
 	return machines
 }
 
-func RunWorkers() {
+func RunWorkers() []*agents.Worker {
+	workers := make([]*agents.Worker, 0)
 	additionMachines := CreateAdditionMachines()
 	multiplicationMachines := CreateMultMachines()
 	for i := 0; i < config.NUM_WORKERS; i++ {
-		//outcome := rand.Intn(100)
-		// var isPatient bool
-		// if outcome < 50 {
-		// 	isPatient = true
-		// } else {
-		// 	isPatient = false
-		// }
+		outcome := rand.Intn(100)
+		var isPatient bool
+		if outcome < 50 {
+			isPatient = true
+		} else {
+			isPatient = false
+		}
 		w := agents.Worker{
 			Id:             i,
 			TaskList:       agents.TaskListRead,
@@ -64,22 +67,16 @@ func RunWorkers() {
 			MulltMachines:  multiplicationMachines,
 			AddMachines:    additionMachines,
 			CompletedTasks: 0,
-			IsPatient:      true}
+			IsPatient:      isPatient}
 		go w.Run()
+		workers = append(workers, &w)
 	}
+	return workers
 }
 
 func RunCustomers() {
 	for i := 0; i < config.NUM_CUSTOMERS; i++ {
 		cust := agents.Customer{i, agents.WarehouseRead, agents.LogChannel}
 		go cust.Run()
-	}
-}
-
-func RunInputListener() {
-	for {
-		PrintMenu()
-		choice := GetChoice()
-		ProcessChoice(choice)
 	}
 }
