@@ -23,18 +23,18 @@ type MultiplicationMachine struct {
 }
 
 func (am *AdditionMachine) SolveAddition(job Job, result chan Job) {
-	am.Logger <- fmt.Sprintf("Addition Machine %d: Executing Job %s", am.Id, job.ToString())
-	time.Sleep(RandomSleepDuration(PT_MACHINE))
+	am.Logger <- fmt.Sprintf("ADDITION MACHINE %d: EXECUTING JOB %s\n", am.Id, job.ToString())
+	time.Sleep(RandomSleepDuration(PT_MACHINE) * time.Second)
 	job.Result = job.First + job.Second
-	am.Logger <- fmt.Sprintf("Addition Machine %d: Job %s = %d Solved!", am.Id, job.ToString(), job.Result)
+	am.Logger <- fmt.Sprintf("ADDITION MACHINE %d: Job %s = %d SOLVED\n", am.Id, job.ToString(), job.Result)
 	result <- job
 }
 
 func (mm *MultiplicationMachine) SolveMultiplication(job Job, result chan Job) {
-	mm.Logger <- fmt.Sprintf("Multiplication Machine %d: Executing Job %s", mm.Id, job.ToString())
-	time.Sleep(RandomSleepDuration(PT_MACHINE))
+	mm.Logger <- fmt.Sprintf("MULTIPLICATION MACHINE %d: EXECUTING JOB %s\n", mm.Id, job.ToString())
+	time.Sleep(RandomSleepDuration(PT_MACHINE) * time.Second)
 	job.Result = job.First * job.Second
-	mm.Logger <- fmt.Sprintf("Multiplication Machine %d: Job %s = %d Solved!", mm.Id, job.ToString(), job.Result)
+	mm.Logger <- fmt.Sprintf("MULTIPLICATION MACHINE %d: JOB %s = %d SOLVED!\n", mm.Id, job.ToString(), job.Result)
 	result <- job
 }
 
