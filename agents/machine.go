@@ -5,9 +5,6 @@ import (
 	"time"
 )
 
-type Machine interface {
-}
-
 type MachineWriteOp struct {
 	InputJob Job
 	Result   chan Job
