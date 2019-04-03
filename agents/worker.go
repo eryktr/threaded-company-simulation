@@ -63,7 +63,7 @@ func (worker *Worker) CreateProduct(job Job) int {
 					worker.IncreaseCompletedTasks()
 					return res.Result
 
-				default:
+				case <-time.After(2 * time.Second):
 					time.Sleep(1 * time.Second)
 					worker.Logger <- fmt.Sprintf("WORKER %d:  ADDITION MACHINE %d IS BUSY. SWITCHING\n", worker.Id, machine.Id)
 					machine = worker.randomAdditionMachine()
@@ -84,8 +84,7 @@ func (worker *Worker) CreateProduct(job Job) int {
 					worker.IncreaseCompletedTasks()
 					return res.Result
 
-				default:
-					time.Sleep(1 * time.Second)
+				case <-time.After(2 * time.Second):
 					worker.Logger <- fmt.Sprintf("WORKER %d:  MULTIPLICATION MACHINE %d IS BUSY. SWITCHING\n", worker.Id, machine.Id)
 					machine = worker.randomMultiplicationMachine()
 				}
