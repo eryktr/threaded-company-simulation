@@ -11,6 +11,7 @@ import (
 var workers []*agents.Worker
 
 func main() {
+	factory.RunService()
 	factory.RunLists()
 	factory.RunLogger()
 	factory.RunBoss()

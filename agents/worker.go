@@ -7,14 +7,15 @@ import (
 )
 
 type Worker struct {
-	Id             int
-	TaskList       chan TaskListReadOperation
-	Warehouse      chan WarehouseWriteOperation
-	Logger         chan string
-	MulltMachines  []MultiplicationMachine
-	AddMachines    []AdditionMachine
-	CompletedTasks int
-	IsPatient      bool
+	Id                     int
+	TaskList               chan TaskListReadOperation
+	Warehouse              chan WarehouseWriteOperation
+	Logger                 chan string
+	MulltMachines          []MultiplicationMachine
+	AddMachines            []AdditionMachine
+	CompletedTasks         int
+	IsPatient              bool
+	BreakdownReportChannel chan ReportChanelWriteOp
 }
 
 func (worker *Worker) Run() {
@@ -30,65 +31,140 @@ func (worker *Worker) CreateProduct(job Job) int {
 
 	if worker.IsPatient {
 		if job.Operation == PLUS {
-			machine := worker.randomAdditionMachine()
-			result := make(chan Job)
-			request := MachineWriteOp{job, result}
-			worker.Logger <- fmt.Sprintf("WORKER %d: WAITING FOR ADDITION MACHINE %d\n", worker.Id, machine.Id)
-			machine.Input <- request
-			res := <-result
+			outcome := 0
+			for outcome == 0 {
+				machine := worker.randomAdditionMachine()
+				result := make(chan Job)
+				request := MachineWriteOp{job, result}
+				worker.Logger <- fmt.Sprintf("WORKER %d: WAITING FOR ADDITION MACHINE %d\n", worker.Id, machine.Id)
+				machine.Input <- request
+				res := <-result
+				outcome = res.Result
+				if outcome == 0 {
+					newReport := BreakdownReport{
+						BreakdownNumber: machine.BreakdownNumber,
+						MachineNumber:   machine.Id,
+						MachineType:     0,
+					}
+					complaint := ReportChanelWriteOp{
+						report: newReport,
+						result: make(chan bool),
+					}
+					worker.BreakdownReportChannel <- complaint
+					<-complaint.result
+					worker.Logger <- fmt.Sprintf("WORKER %d: ADDITION MACHINE %d DID NOT HELP ME. I REPORTED IT.\n", worker.Id, machine.Id)
+				}
+				return outcome
+			}
 			worker.IncreaseCompletedTasks()
-			return res.Result
 		} else if job.Operation == TIMES {
-			machine := worker.randomMultiplicationMachine()
-			result := make(chan Job)
-			request := MachineWriteOp{job, result}
-			worker.Logger <- fmt.Sprintf("WORKER %d: WAITING FOR MULTIPLICATION MACHINE %d\n", worker.Id, machine.Id)
-			machine.Input <- request
-			res := <-result
+			outcome := 0
+			for outcome == 0 {
+				machine := worker.randomMultiplicationMachine()
+				result := make(chan Job)
+				request := MachineWriteOp{job, result}
+				worker.Logger <- fmt.Sprintf("WORKER %d: WAITING FOR MULTIPLICATION MACHINE %d\n", worker.Id, machine.Id)
+				machine.Input <- request
+				res := <-result
+				outcome = res.Result
+				if outcome == 0 {
+					newReport := BreakdownReport{
+						BreakdownNumber: machine.BreakdownNumber,
+						MachineNumber:   machine.Id,
+						MachineType:     1,
+					}
+					complaint := ReportChanelWriteOp{
+						report: newReport,
+						result: make(chan bool),
+					}
+					worker.BreakdownReportChannel <- complaint
+					<-complaint.result
+					worker.Logger <- fmt.Sprintf("WORKER %d: MULTIPLICATION MACHINE %d DID NOT HELP ME. I REPORTED IT.\n", worker.Id, machine.Id)
+				}
+			}
 			worker.IncreaseCompletedTasks()
-			return res.Result
+			return outcome
 		}
+
 	} else {
 		if job.Operation == PLUS {
-			machine := worker.randomAdditionMachine()
-			result := make(chan Job)
-			request := MachineWriteOp{job, result}
-			working := false
-			worker.Logger <- fmt.Sprintf("WORKER %d: WAITING FOR ADDITION MACHINE %d\n", worker.Id, machine.Id)
-			for !working {
-				select {
-				case machine.Input <- request:
-					working = true
-					res := <-result
-					worker.IncreaseCompletedTasks()
-					return res.Result
+			outcome := 0
+			for outcome == 0 {
+				machine := worker.randomAdditionMachine()
+				result := make(chan Job)
+				request := MachineWriteOp{job, result}
+				working := false
+				worker.Logger <- fmt.Sprintf("WORKER %d: WAITING FOR ADDITION MACHINE %d\n", worker.Id, machine.Id)
+				for !working {
+					select {
+					case machine.Input <- request:
+						working = true
+						res := <-result
+						worker.IncreaseCompletedTasks()
+						outcome = res.Result
 
-				case <-time.After(2 * time.Second):
-					time.Sleep(1 * time.Second)
-					worker.Logger <- fmt.Sprintf("WORKER %d:  ADDITION MACHINE %d IS BUSY. SWITCHING\n", worker.Id, machine.Id)
-					machine = worker.randomAdditionMachine()
+					case <-time.After(2 * time.Second):
+						time.Sleep(1 * time.Second)
+						worker.Logger <- fmt.Sprintf("WORKER %d:  ADDITION MACHINE %d IS BUSY. SWITCHING\n", worker.Id, machine.Id)
+						machine = worker.randomAdditionMachine()
+					}
 				}
-
+				if outcome == 0 {
+					newReport := BreakdownReport{
+						BreakdownNumber: machine.BreakdownNumber,
+						MachineNumber:   machine.Id,
+						MachineType:     0,
+					}
+					complaint := ReportChanelWriteOp{
+						report: newReport,
+						result: make(chan bool),
+					}
+					worker.BreakdownReportChannel <- complaint
+					<-complaint.result
+					worker.Logger <- fmt.Sprintf("WORKER %d: ADDITION MACHINE %d DID NOT HELP ME. I REPORTED IT\n", worker.Id, machine.Id)
+				}
 			}
+			worker.IncreaseCompletedTasks()
+			return outcome
 		} else if job.Operation == TIMES {
-			machine := worker.randomMultiplicationMachine()
-			result := make(chan Job)
-			request := MachineWriteOp{job, result}
-			working := false
-			worker.Logger <- fmt.Sprintf("WORKER %d: WAITING FOR MULTIPLICATION MACHINE %d\n", worker.Id, machine.Id)
-			for !working {
-				select {
-				case machine.Input <- request:
-					working = true
-					res := <-result
-					worker.IncreaseCompletedTasks()
-					return res.Result
+			outcome := 0
+			for outcome == 0 {
+				machine := worker.randomMultiplicationMachine()
+				result := make(chan Job)
+				request := MachineWriteOp{job, result}
+				working := false
+				worker.Logger <- fmt.Sprintf("WORKER %d: WAITING FOR MULTIPLICATION MACHINE %d\n", worker.Id, machine.Id)
+				for !working {
+					select {
+					case machine.Input <- request:
+						working = true
+						res := <-result
+						worker.IncreaseCompletedTasks()
+						outcome = res.Result
 
-				case <-time.After(2 * time.Second):
-					worker.Logger <- fmt.Sprintf("WORKER %d:  MULTIPLICATION MACHINE %d IS BUSY. SWITCHING\n", worker.Id, machine.Id)
-					machine = worker.randomMultiplicationMachine()
+					case <-time.After(2 * time.Second):
+						worker.Logger <- fmt.Sprintf("WORKER %d:  MULTIPLICATION MACHINE %d IS BUSY. SWITCHING\n", worker.Id, machine.Id)
+						machine = worker.randomMultiplicationMachine()
+					}
+				}
+				if outcome == 0 {
+					newReport := BreakdownReport{
+						BreakdownNumber: machine.BreakdownNumber,
+						MachineNumber:   machine.Id,
+						MachineType:     1,
+					}
+					complaint := ReportChanelWriteOp{
+						report: newReport,
+						result: make(chan bool),
+					}
+					worker.BreakdownReportChannel <- complaint
+					<-complaint.result
+					worker.Logger <- fmt.Sprintf("WORKER %d: MULTIPLICATION MACHINE %d DID NOT HELP ME. I REPORTED IT\n", worker.Id, machine.Id)
 				}
 			}
+			worker.IncreaseCompletedTasks()
+			return outcome
+
 		}
 	}
 

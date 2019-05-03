@@ -25,3 +25,16 @@ var TaskListRead = make(chan TaskListReadOperation)
 var WarehouseWrite = make(chan WarehouseWriteOperation)
 var WarehouseRead = make(chan WarehouseReadOperation)
 var LogChannel = make(chan string)
+var ServiceReportWrite = make(chan ReportChanelWriteOp)
+var ServiceReportRead = make(chan ReportChannelReadOp)
+var ServiceFixWrite = make(chan FixReport)
+var ReportCache = make([]BreakdownReport, 1)
+var Reports = make([]BreakdownReport, 1)
+var OfficialService = Service{
+	Logger:      LogChannel,
+	ReportWrite: ServiceReportWrite,
+	ReportRead:  ServiceReportRead,
+	ReportCache: ReportCache,
+	Reports:     Reports,
+	FixChannel:  ServiceFixWrite,
+}

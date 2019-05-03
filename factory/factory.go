@@ -67,14 +67,16 @@ func RunWorkers() []*agents.Worker {
 			isPatient = false
 		}
 		w := agents.Worker{
-			Id:             i,
-			TaskList:       agents.TaskListRead,
-			Warehouse:      agents.WarehouseWrite,
-			Logger:         agents.LogChannel,
-			MulltMachines:  multiplicationMachines,
-			AddMachines:    additionMachines,
-			CompletedTasks: 0,
-			IsPatient:      isPatient}
+			Id:                     i,
+			TaskList:               agents.TaskListRead,
+			Warehouse:              agents.WarehouseWrite,
+			Logger:                 agents.LogChannel,
+			MulltMachines:          multiplicationMachines,
+			AddMachines:            additionMachines,
+			CompletedTasks:         0,
+			IsPatient:              isPatient,
+			BreakdownReportChannel: agents.ServiceReportWrite,
+		}
 		go w.Run()
 		workers = append(workers, &w)
 	}
@@ -86,4 +88,8 @@ func RunCustomers() {
 		cust := agents.Customer{i, agents.WarehouseRead, agents.LogChannel}
 		go cust.Run()
 	}
+}
+
+func RunService() {
+	go agents.OfficialService.Run()
 }
