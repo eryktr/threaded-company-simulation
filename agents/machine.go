@@ -50,7 +50,7 @@ func (mm *MultiplicationMachine) BreakDown() {
 func (am *AdditionMachine) SolveAddition(job Job, result chan Job) {
 	threshold := config.BREAKDOWN_PROBABILITY
 	outcome := rand.Intn(100)
-	if outcome > threshold {
+	if outcome < threshold {
 		am.BreakDown()
 	}
 	if am.IsBroken {
@@ -68,7 +68,7 @@ func (am *AdditionMachine) SolveAddition(job Job, result chan Job) {
 func (mm *MultiplicationMachine) SolveMultiplication(job Job, result chan Job) {
 	threshold := config.BREAKDOWN_PROBABILITY
 	outcome := rand.Intn(100)
-	if outcome > threshold {
+	if outcome < threshold {
 		mm.BreakDown()
 	}
 	if mm.IsBroken {
@@ -90,7 +90,7 @@ func (am *AdditionMachine) RunAdditionMachine() {
 			am.SolveAddition(task.InputJob, task.Result)
 		case <-am.FixMe:
 			am.Logger <- fmt.Sprintf("ADDITION MACHINE %d HAS BEEN FIXED\n", am.Id)
-			am.IsBroken = true
+			am.IsBroken = false
 			am.BreakdownNumber++
 		}
 
@@ -103,8 +103,8 @@ func (mm *MultiplicationMachine) RunMultiplicationMachine() {
 		case task := <-mm.Input:
 			mm.SolveMultiplication(task.InputJob, task.Result)
 		case <-mm.FixMe:
-			mm.Logger <- fmt.Sprintf("MULTIPLICATION MACHINE %d HAS BROKEN DOWN \n", mm.Id)
-			mm.IsBroken = true
+			mm.Logger <- fmt.Sprintf("MULTIPLICATION MACHINE %d HAS BEEN FIXED \n", mm.Id)
+			mm.IsBroken = false
 			mm.BreakdownNumber++
 		}
 
