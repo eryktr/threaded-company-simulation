@@ -21,8 +21,8 @@ func RunBoss() {
 	go Boss.Run()
 }
 
-func CreateMultMachines() []agents.MultiplicationMachine {
-	var machines = make([]agents.MultiplicationMachine, 0)
+func CreateMultMachines() []*agents.MultiplicationMachine {
+	var machines = make([]*agents.MultiplicationMachine, 0)
 	for i := 0; i < config.NUM_MULT_MACHINES; i++ {
 		machine := agents.MultiplicationMachine{
 			Id:              i,
@@ -33,13 +33,13 @@ func CreateMultMachines() []agents.MultiplicationMachine {
 			FixMe:           make(chan bool)}
 
 		go machine.RunMultiplicationMachine()
-		machines = append(machines, machine)
+		machines = append(machines, &machine)
 	}
 	return machines
 }
 
-func CreateAdditionMachines() []agents.AdditionMachine {
-	var machines = make([]agents.AdditionMachine, 0)
+func CreateAdditionMachines() []*agents.AdditionMachine {
+	var machines = make([]*agents.AdditionMachine, 0)
 	for i := 0; i < config.NUM_MULT_MACHINES; i++ {
 		machine := agents.AdditionMachine{
 			Id:              i,
@@ -49,7 +49,7 @@ func CreateAdditionMachines() []agents.AdditionMachine {
 			BreakdownNumber: 0,
 			FixMe:           make(chan bool)}
 		go machine.RunAdditionMachine()
-		machines = append(machines, machine)
+		machines = append(machines, &machine)
 	}
 	return machines
 }
@@ -91,5 +91,35 @@ func RunCustomers() {
 }
 
 func RunService() {
-	go agents.OfficialService.Run()
+	var ReportCache = make([]agents.BreakdownReport, 0)
+	var Reports = make([]agents.BreakdownReport, 0)
+	OfficialService := agents.Service{
+		Logger:      agents.LogChannel,
+		ReportWrite: agents.ServiceReportWrite,
+		ReportRead:  agents.ServiceReportRead,
+		ReportCache: ReportCache,
+		Reports:     Reports,
+		FixChannel:  agents.ServiceFixWrite,
+	}
+	go OfficialService.Run()
+}
+
+func RunServiceWorkers(mms []*agents.MultiplicationMachine, ams []*agents.AdditionMachine) []*agents.ServiceWorker {
+	workers := make([]*agents.ServiceWorker, 0)
+	for i := 0; i < config.NUM_SERVICE_WORKERS; i++ {
+		sw := agents.ServiceWorker{
+			Id:            i,
+			AddMachines:   ams,
+			MulltMachines: mms,
+			Logger:        agents.LogChannel,
+			FixChannel:    agents.ServiceFixWrite,
+			ReportChannel: agents.ServiceReportRead,
+		}
+		workers = append(workers, &sw)
+	}
+
+	for _, worker := range workers {
+		go worker.Run()
+	}
+	return workers
 }

@@ -14,11 +14,11 @@ const (
 )
 
 const (
-	NUM_WORKERS         = 40
-	NUM_CUSTOMERS       = 10
+	NUM_WORKERS         = 5
+	NUM_CUSTOMERS       = 2
 	NUM_ADD_MACHINES    = 3
 	NUM_MULT_MACHINES   = 3
-	NUM_SERVICE_WORKERS = 4
+	NUM_SERVICE_WORKERS = 2
 )
 
 const (

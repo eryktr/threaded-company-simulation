@@ -11,8 +11,8 @@ type Worker struct {
 	TaskList               chan TaskListReadOperation
 	Warehouse              chan WarehouseWriteOperation
 	Logger                 chan string
-	MulltMachines          []MultiplicationMachine
-	AddMachines            []AdditionMachine
+	MulltMachines          []*MultiplicationMachine
+	AddMachines            []*AdditionMachine
 	CompletedTasks         int
 	IsPatient              bool
 	BreakdownReportChannel chan ReportChanelWriteOp
@@ -50,13 +50,17 @@ func (worker *Worker) CreateProduct(job Job) int {
 						report: newReport,
 						result: make(chan bool),
 					}
+					worker.Logger <- "Trying to fill in a complaint \n"
 					worker.BreakdownReportChannel <- complaint
+					worker.Logger <- "Waiting for complaint result \n"
 					<-complaint.result
 					worker.Logger <- fmt.Sprintf("WORKER %d: ADDITION MACHINE %d DID NOT HELP ME. I REPORTED IT.\n", worker.Id, machine.Id)
+					worker.Sleep()
 				}
-				return outcome
 			}
 			worker.IncreaseCompletedTasks()
+			return outcome
+
 		} else if job.Operation == TIMES {
 			outcome := 0
 			for outcome == 0 {
@@ -77,9 +81,12 @@ func (worker *Worker) CreateProduct(job Job) int {
 						report: newReport,
 						result: make(chan bool),
 					}
+					worker.Logger <- "Trying to fill in a complaint \n"
 					worker.BreakdownReportChannel <- complaint
+					worker.Logger <- "Waiting for complaint result \n"
 					<-complaint.result
 					worker.Logger <- fmt.Sprintf("WORKER %d: MULTIPLICATION MACHINE %d DID NOT HELP ME. I REPORTED IT.\n", worker.Id, machine.Id)
+					worker.Sleep()
 				}
 			}
 			worker.IncreaseCompletedTasks()
@@ -119,9 +126,12 @@ func (worker *Worker) CreateProduct(job Job) int {
 						report: newReport,
 						result: make(chan bool),
 					}
+					worker.Logger <- "Trying to fill in a complaint \n"
 					worker.BreakdownReportChannel <- complaint
+					worker.Logger <- "Waiting for complaint result \n"
 					<-complaint.result
 					worker.Logger <- fmt.Sprintf("WORKER %d: ADDITION MACHINE %d DID NOT HELP ME. I REPORTED IT\n", worker.Id, machine.Id)
+					worker.Sleep()
 				}
 			}
 			worker.IncreaseCompletedTasks()
@@ -139,7 +149,6 @@ func (worker *Worker) CreateProduct(job Job) int {
 					case machine.Input <- request:
 						working = true
 						res := <-result
-						worker.IncreaseCompletedTasks()
 						outcome = res.Result
 
 					case <-time.After(2 * time.Second):
@@ -157,9 +166,12 @@ func (worker *Worker) CreateProduct(job Job) int {
 						report: newReport,
 						result: make(chan bool),
 					}
+					worker.Logger <- "Trying to fill in a complaint \n"
 					worker.BreakdownReportChannel <- complaint
+					worker.Logger <- "Waiting for complaint result \n"
 					<-complaint.result
 					worker.Logger <- fmt.Sprintf("WORKER %d: MULTIPLICATION MACHINE %d DID NOT HELP ME. I REPORTED IT\n", worker.Id, machine.Id)
+					worker.Sleep()
 				}
 			}
 			worker.IncreaseCompletedTasks()
@@ -196,12 +208,12 @@ func (worker *Worker) StoreProduct(product int) {
 	worker.Logger <- fmt.Sprintf("Worker %d: PRODUCT %d STORED IN THE WAREHOUSE\n", worker.Id, product)
 }
 
-func (worker *Worker) randomMultiplicationMachine() MultiplicationMachine {
+func (worker *Worker) randomMultiplicationMachine() *MultiplicationMachine {
 	i := rand.Intn(len(worker.MulltMachines))
 	return worker.MulltMachines[i]
 }
 
-func (worker *Worker) randomAdditionMachine() AdditionMachine {
+func (worker *Worker) randomAdditionMachine() *AdditionMachine {
 	i := rand.Intn(len(worker.AddMachines))
 	return worker.AddMachines[i]
 }

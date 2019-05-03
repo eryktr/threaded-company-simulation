@@ -9,13 +9,15 @@ import (
 )
 
 var workers []*agents.Worker
+var serviceWorkers []*agents.ServiceWorker
 
 func main() {
-	factory.RunService()
 	factory.RunLists()
 	factory.RunLogger()
 	factory.RunBoss()
+	factory.RunService()
 	workers = factory.RunWorkers()
+	serviceWorkers = factory.RunServiceWorkers(workers[0].MulltMachines, workers[0].AddMachines)
 	factory.RunCustomers()
 	if config.MODE == 1 {
 		RunInputListener()
