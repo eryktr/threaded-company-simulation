@@ -25,9 +25,13 @@ func CreateMultMachines() []agents.MultiplicationMachine {
 	var machines = make([]agents.MultiplicationMachine, 0)
 	for i := 0; i < config.NUM_MULT_MACHINES; i++ {
 		machine := agents.MultiplicationMachine{
-			Id:     i,
-			Input:  make(chan agents.MachineWriteOp),
-			Logger: agents.LogChannel}
+			Id:              i,
+			Input:           make(chan agents.MachineWriteOp),
+			Logger:          agents.LogChannel,
+			IsBroken:        false,
+			BreakdownNumber: 0,
+			FixMe:           make(chan bool)}
+
 		go machine.RunMultiplicationMachine()
 		machines = append(machines, machine)
 	}
@@ -38,9 +42,12 @@ func CreateAdditionMachines() []agents.AdditionMachine {
 	var machines = make([]agents.AdditionMachine, 0)
 	for i := 0; i < config.NUM_MULT_MACHINES; i++ {
 		machine := agents.AdditionMachine{
-			Id:     i,
-			Input:  make(chan agents.MachineWriteOp),
-			Logger: agents.LogChannel}
+			Id:              i,
+			Input:           make(chan agents.MachineWriteOp),
+			Logger:          agents.LogChannel,
+			IsBroken:        false,
+			BreakdownNumber: 0,
+			FixMe:           make(chan bool)}
 		go machine.RunAdditionMachine()
 		machines = append(machines, machine)
 	}
