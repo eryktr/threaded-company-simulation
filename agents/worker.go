@@ -50,9 +50,7 @@ func (worker *Worker) CreateProduct(job Job) int {
 						report: newReport,
 						result: make(chan bool),
 					}
-					worker.Logger <- "Trying to fill in a complaint \n"
 					worker.BreakdownReportChannel <- complaint
-					worker.Logger <- "Waiting for complaint result \n"
 					<-complaint.result
 					worker.Logger <- fmt.Sprintf("WORKER %d: ADDITION MACHINE %d DID NOT HELP ME. I REPORTED IT.\n", worker.Id, machine.Id)
 					worker.Sleep()
@@ -81,9 +79,7 @@ func (worker *Worker) CreateProduct(job Job) int {
 						report: newReport,
 						result: make(chan bool),
 					}
-					worker.Logger <- "Trying to fill in a complaint \n"
 					worker.BreakdownReportChannel <- complaint
-					worker.Logger <- "Waiting for complaint result \n"
 					<-complaint.result
 					worker.Logger <- fmt.Sprintf("WORKER %d: MULTIPLICATION MACHINE %d DID NOT HELP ME. I REPORTED IT.\n", worker.Id, machine.Id)
 					worker.Sleep()
@@ -126,9 +122,7 @@ func (worker *Worker) CreateProduct(job Job) int {
 						report: newReport,
 						result: make(chan bool),
 					}
-					worker.Logger <- "Trying to fill in a complaint \n"
 					worker.BreakdownReportChannel <- complaint
-					worker.Logger <- "Waiting for complaint result \n"
 					<-complaint.result
 					worker.Logger <- fmt.Sprintf("WORKER %d: ADDITION MACHINE %d DID NOT HELP ME. I REPORTED IT\n", worker.Id, machine.Id)
 					worker.Sleep()
@@ -166,9 +160,7 @@ func (worker *Worker) CreateProduct(job Job) int {
 						report: newReport,
 						result: make(chan bool),
 					}
-					worker.Logger <- "Trying to fill in a complaint \n"
 					worker.BreakdownReportChannel <- complaint
-					worker.Logger <- "Waiting for complaint result \n"
 					<-complaint.result
 					worker.Logger <- fmt.Sprintf("WORKER %d: MULTIPLICATION MACHINE %d DID NOT HELP ME. I REPORTED IT\n", worker.Id, machine.Id)
 					worker.Sleep()

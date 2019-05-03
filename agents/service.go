@@ -55,7 +55,6 @@ func (s *Service) Run() {
 	for {
 		select {
 		case report := <-s.ReportWrite:
-			s.Logger <- "COMPLAINT RECEIVED \n"
 			newReport := report.report
 			alreadyReported := false
 			for i := 0; i < len(s.ReportCache); i++ {
@@ -76,8 +75,6 @@ func (s *Service) Run() {
 			report.result <- true
 
 		case request := <-maybeReadReport(len(s.Reports) > 0, s.ReportRead):
-			s.Logger <- "READING\n"
-			s.Logger <- fmt.Sprintf("Size of reports: %d\n", len(s.Reports))
 			response := s.Reports[0]
 			s.Reports = s.Reports[1:]
 			request.report <- response
